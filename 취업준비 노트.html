@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="취준 노트">
+<title>취준 노트</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f7a6b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: #e2ddd7;
+  --text: #1a1816;
+  --text2: #6b6560;
+  --text3: #a09b96;
+  --teal: #0f7a6b;
+  --teal-bg: #e0f5f1;
+  --teal-text: #0a5c50;
+  --blue: #1a5fa8;
+  --blue-bg: #e6f0fb;
+  --blue-text: #154a84;
+  --amber: #a05a00;
+  --amber-bg: #fef3e0;
+  --amber-text: #7a4500;
+  --coral: #b53a1e;
+  --coral-bg: #fdeee9;
+  --coral-text: #8c2c14;
+  --purple: #5540b8;
+  --purple-bg: #eeedfb;
+  --purple-text: #3f2f9a;
+  --green: #2e7d1e;
+  --green-bg: #e8f5e4;
+  --green-text: #215c15;
+  --red: #c0392b;
+  --red-bg: #fde8e6;
+  --red-text: #922b21;
+  --nav-h: 60px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+
+/* ALERT BANNER */
+.alert-banner{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:999;
+  background:var(--coral);color:#fff;
+  padding:12px 16px;font-size:13px;font-weight:500;
+  flex-direction:column;gap:4px;
+}
+.alert-banner.show{display:flex;}
+.alert-banner .close-alert{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px;}
+.alert-item{font-size:12px;opacity:.9;}
+
+/* NAV */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(var(--nav-h) + var(--safe-bottom));
+  background:var(--surface);border-top:1px solid var(--border);
+  display:flex;align-items:flex-start;padding-top:4px;
+  z-index:100;
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;border:none;background:none;cursor:pointer;
+  color:var(--text3);font-size:10px;font-weight:500;font-family:inherit;
+  padding:4px 0;transition:color .15s;
+}
+.nav-btn.active{color:var(--teal);}
+.nav-btn svg{width:22px;height:22px;stroke-width:1.8;}
+
+/* MAIN SCROLL */
+.main-scroll{
+  position:fixed;top:0;left:0;right:0;
+  bottom:calc(var(--nav-h) + var(--safe-bottom));
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* HEADER */
+.page-header{
+  padding:16px 16px 10px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:50;
+}
+.page-header h1{font-size:18px;font-weight:700;}
+.page-header p{font-size:12px;color:var(--text2);margin-top:2px;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px 16px;}
+.stat-card{background:var(--surface);border-radius:12px;border:1px solid var(--border);padding:12px;text-align:center;}
+.stat-n{font-size:24px;font-weight:700;color:var(--text);}
+.stat-l{font-size:11px;color:var(--text2);margin-top:2px;}
+
+/* SECTION */
+.section{padding:0 16px;margin-top:12px;padding-bottom:80px;}
+.section-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;}
+
+/* CARDS */
+.item-list{display:flex;flex-direction:column;gap:8px;}
+.item-card{
+  background:var(--surface);border-radius:14px;
+  border:1px solid var(--border);padding:14px 16px;
+  cursor:pointer;transition:border-color .15s;
+}
+.item-card:active{border-color:var(--teal);background:#f8fffe;}
+.item-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.3;}
+.item-desc{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.5;}
+.item-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.bt{background:var(--teal-bg);color:var(--teal-text);}
+.bb{background:var(--blue-bg);color:var(--blue-text);}
+.ba{background:var(--amber-bg);color:var(--amber-text);}
+.bc{background:var(--coral-bg);color:var(--coral-text);}
+.bp{background:var(--purple-bg);color:var(--purple-text);}
+.bg{background:var(--green-bg);color:var(--green-text);}
+.br{background:var(--red-bg);color:var(--red-text);}
+.del-btn{
+  width:28px;height:28px;border-radius:50%;border:1px solid var(--border);
+  background:none;color:var(--text3);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.del-btn:active{background:var(--red-bg);color:var(--red);border-color:var(--red);}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3);font-size:13px;line-height:2;}
+.empty-icon{font-size:40px;display:block;margin-bottom:8px;}
+
+/* FAB */
+.fab{
+  position:fixed;right:20px;
+  bottom:calc(var(--nav-h) + var(--safe-bottom) + 14px);
+  width:52px;height:52px;border-radius:50%;
+  background:var(--teal);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 18px rgba(15,122,107,.38);
+  z-index:90;transition:transform .15s;
+}
+.fab:active{transform:scale(.92);}
+.fab svg{width:24px;height:24px;stroke:#fff;stroke-width:2.4;}
+
+/* SHEET */
+.sheet-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.45);z-index:200;
+  align-items:flex-end;
+}
+.sheet-overlay.open{display:flex;}
+.sheet{
+  background:var(--surface);border-radius:22px 22px 0 0;
+  width:100%;max-height:92vh;overflow-y:auto;
+  padding:0 16px calc(var(--safe-bottom) + 28px);
+  animation:slideUp .22s ease;
+}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:12px auto 14px;}
+.sheet-title{font-size:17px;font-weight:700;margin-bottom:14px;}
+.field{margin-bottom:12px;}
+.field label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--bg);border:1px solid var(--border);
+  border-radius:10px;padding:11px 13px;
+  font-size:14px;font-family:inherit;color:var(--text);
+  outline:none;transition:border-color .15s;
+  -webkit-appearance:none;appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);}
+.field textarea{resize:none;min-height:84px;line-height:1.6;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.submit-btn{
+  width:100%;padding:14px;border-radius:14px;
+  background:var(--teal);color:#fff;border:none;
+  font-size:15px;font-weight:700;font-family:inherit;
+  cursor:pointer;margin-top:6px;
+}
+.submit-btn:active{opacity:.85;}
+
+/* DETAIL */
+.detail-overlay{
+  display:none;position:fixed;inset:0;
+  background:var(--bg);z-index:300;overflow-y:auto;
+}
+.detail-overlay.open{display:block;}
+.detail-header{
+  padding:14px 16px;display:flex;align-items:center;gap:10px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:10;
+}
+.back-btn{
+  width:36px;height:36px;border-radius:50%;border:1px solid var(--border);
+  background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.back-btn svg{width:18px;height:18px;stroke:var(--text);stroke-width:2;}
+.detail-header-title{font-size:16px;font-weight:700;flex:1;}
+.detail-body{padding:16px 16px 40px;}
+.detail-field{margin-bottom:14px;}
+.detail-label{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px;}
+.detail-value{font-size:14px;color:var(--text);line-height:1.7;background:var(--surface);border-radius:10px;border:1px solid var(--border);padding:12px 14px;}
+.ai-btn{
+  width:100%;padding:14px;border-radius:14px;
+  background:var(--surface);border:2px solid var(--teal);
+  color:var(--teal);font-size:14px;font-weight:700;font-family:inherit;
+  cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.ai-btn svg{width:17px;height:17px;stroke:var(--teal);stroke-width:2.2;}
+.ai-note{font-size:11px;color:var(--text3);text-align:center;margin-top:7px;line-height:1.6;}
+
+/* HOME */
+.home-hero{padding:20px 16px 8px;}
+.home-hero h2{font-size:20px;font-weight:700;line-height:1.4;}
+.home-hero p{font-size:13px;color:var(--text2);margin-top:3px;}
+.progress-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:8px;}
+.progress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.progress-label{font-size:13px;font-weight:600;}
+.progress-count{font-size:12px;color:var(--text2);}
+.progress-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--teal);border-radius:3px;transition:width .5s ease;}
+
+/* SCHEDULE specific */
+.sched-card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:14px 16px;margin-bottom:8px;cursor:pointer;}
+.sched-card:active{border-color:var(--teal);}
+.sched-top{display:flex;align-items:flex-start;gap:12px;}
+.sched-date-box{
+  min-width:46px;text-align:center;background:var(--teal-bg);
+  border-radius:10px;padding:6px 4px;flex-shrink:0;
+}
+.sched-month{font-size:10px;font-weight:700;color:var(--teal-text);text-transform:uppercase;}
+.sched-day{font-size:20px;font-weight:700;color:var(--teal-text);line-height:1.1;}
+.sched-info{flex:1;}
+.sched-title{font-size:14px;font-weight:600;color:var(--text);}
+.sched-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.sched-dday{font-size:12px;font-weight:700;}
+.dday-urgent{color:var(--red);}
+.dday-soon{color:var(--amber);}
+.dday-ok{color:var(--teal);}
+.dday-past{color:var(--text3);}
+.sched-card.urgent{border-color:#f09595;}
+.sched-card.urgent .sched-date-box{background:var(--red-bg);}
+.sched-card.urgent .sched-month,.sched-card.urgent .sched-day{color:var(--red-text);}
+</style>
+</head>
+<body>
+
+<!-- ALERT -->
+<div class="alert-banner" id="alert-banner">
+  <button class="close-alert" onclick="document.getElementById('alert-banner').classList.remove('show')">✕</button>
+  <div style="font-weight:700;margin-bottom:2px;">⚠️ 마감 임박 일정</div>
+  <div id="alert-items"></div>
+</div>
+
+<!-- MAIN SCROLL -->
+<div class="main-scroll" id="main-scroll">
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="page-header"><h1>취준 노트</h1><p>방사선사 취업 준비</p></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-n" id="h-exp">0</div><div class="stat-l">내 경험</div></div>
+    <div class="stat-card"><div class="stat-n" id="h-hosp">0</div><div class="stat-l">병원</div></div>
+    <div class="stat-card"><div class="stat-n" id="h-essay">0</div><div class="stat-l">자소서</div></div>
+    <div class="stat-card"><div class="stat-n" id="h-iv">0</div><div class="stat-l">면접 Q</div></div>
+  </div>
+  <div class="section">
+    <div class="home-hero">
+      <h2 id="greeting">안녕하세요!</h2>
+      <p>오늘도 한 걸음씩 준비해봐요</p>
+    </div>
+    <div style="margin-top:16px;">
+      <div class="section-title">준비 현황</div>
+      <div class="progress-card"><div class="progress-row"><span class="progress-label">경험 정리</span><span class="progress-count" id="pg-exp-t">0개</span></div><div class="progress-bar"><div class="progress-fill" id="pg-exp" style="width:0%"></div></div></div>
+      <div class="progress-card"><div class="progress-row"><span class="progress-label">병원 조사</span><span class="progress-count" id="pg-hosp-t">0개</span></div><div class="progress-bar"><div class="progress-fill" id="pg-hosp" style="width:0%"></div></div></div>
+      <div class="progress-card"><div class="progress-row"><span class="progress-label">자소서 작성</span><span class="progress-count" id="pg-essay-t">0문항</span></div><div class="progress-bar"><div class="progress-fill" id="pg-essay" style="width:0%"></div></div></div>
+      <div class="progress-card"><div class="progress-row"><span class="progress-label">면접 준비</span><span class="progress-count" id="pg-iv-t">0개</span></div><div class="progress-bar"><div class="progress-fill" id="pg-iv" style="width:0%"></div></div></div>
+    </div>
+    <div style="margin-top:16px;" id="home-upcoming">
+      <div class="section-title">다가오는 일정</div>
+      <div id="home-upcoming-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EXP -->
+<div id="page-exp" class="page">
+  <div class="page-header"><h1>내 경험</h1><p>실습·알바·동아리·봉사 등</p></div>
+  <div class="section"><div class="item-list" id="list-exp"></div></div>
+</div>
+
+<!-- HOSP -->
+<div id="page-hosp" class="page">
+  <div class="page-header"><h1>병원 정보</h1><p>지원 병원 특징·면접 후기 메모</p></div>
+  <div class="section"><div class="item-list" id="list-hosp"></div></div>
+</div>
+
+<!-- ESSAY -->
+<div id="page-essay" class="page">
+  <div class="page-header"><h1>자소서</h1><p>문항별 초안 정리</p></div>
+  <div class="section"><div class="item-list" id="list-essay"></div></div>
+</div>
+
+<!-- INTERVIEW -->
+<div id="page-iv" class="page">
+  <div class="page-header"><h1>면접 Q&amp;A</h1><p>예상 질문과 내 답변</p></div>
+  <div class="section"><div class="item-list" id="list-iv"></div></div>
+</div>
+
+<!-- SCHEDULE -->
+<div id="page-sched" class="page">
+  <div class="page-header"><h1>일정</h1><p>서류·면접·결과 일정 관리</p></div>
+  <div class="section"><div id="list-sched"></div></div>
+</div>
+
+</div><!-- /main-scroll -->
+
+<!-- NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="goPage('home')" id="nav-home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>홈
+  </button>
+  <button class="nav-btn" onclick="goPage('exp')" id="nav-exp">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>경험
+  </button>
+  <button class="nav-btn" onclick="goPage('hosp')" id="nav-hosp">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="6" width="18" height="15" rx="2"/><path d="M3 10h18M12 13v4M10 15h4"/></svg>병원
+  </button>
+  <button class="nav-btn" onclick="goPage('essay')" id="nav-essay">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>자소서
+  </button>
+  <button class="nav-btn" onclick="goPage('sched')" id="nav-sched">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>일정
+  </button>
+</nav>
+
+<!-- FAB -->
+<button class="fab" id="fab-btn" onclick="openForm()" style="display:none" aria-label="추가">
+  <svg viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- SHEETS -->
+<div class="sheet-overlay" id="sheet-exp" onclick="closeSheet('exp')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">경험 추가</div>
+    <div class="field"><label>종류</label>
+      <select id="f-exp-type"><option value="실습">임상실습</option><option value="알바">아르바이트</option><option value="동아리">동아리·학생회</option><option value="봉사">봉사활동</option><option value="수상">수상·공모전</option><option value="기타">기타</option></select>
+    </div>
+    <div class="field"><label>제목</label><input id="f-exp-title" placeholder="예: ○○병원 방사선과 실습"></div>
+    <div class="field-row">
+      <div class="field"><label>기간</label><input id="f-exp-period" placeholder="2024.03~05"></div>
+      <div class="field"><label>기관</label><input id="f-exp-place" placeholder="예: 아산병원"></div>
+    </div>
+    <div class="field"><label>한 일 / 배운 점</label><textarea id="f-exp-detail" placeholder="구체적으로 적을수록 자소서에 쓰기 좋아요"></textarea></div>
+    <div class="field"><label>핵심 키워드 (쉼표로 구분)</label><input id="f-exp-kw" placeholder="예: 환자소통, 정확성, 팀워크"></div>
+    <button class="submit-btn" onclick="saveExp()">저장</button>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet-hosp" onclick="closeSheet('hosp')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">병원 정보 추가</div>
+    <div class="field"><label>병원명</label><input id="f-hosp-name" placeholder="예: 서울아산병원"></div>
+    <div class="field-row">
+      <div class="field"><label>규모</label>
+        <select id="f-hosp-size"><option>빅5 병원</option><option>상급종합병원</option><option>종합병원</option><option>병원·의원</option><option>공공병원</option></select>
+      </div>
+      <div class="field"><label>지원 상태</label>
+        <select id="f-hosp-status"><option value="관심">관심</option><option value="준비중">준비중</option><option value="지원완료">지원완료</option><option value="면접예정">면접예정</option></select>
+      </div>
+    </div>
+    <div class="field"><label>비전·특징</label><textarea id="f-hosp-vision" placeholder="핵심 가치, 특화 장비, 규모 등"></textarea></div>
+    <div class="field"><label>면접 후기 / 메모</label><textarea id="f-hosp-review" placeholder="블라인드·잡플래닛 후기, 기출 질문 등"></textarea></div>
+    <button class="submit-btn" onclick="saveHosp()">저장</button>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet-essay" onclick="closeSheet('essay')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">자소서 문항 추가</div>
+    <div class="field"><label>병원명</label><input id="f-essay-hosp" placeholder="예: 서울아산병원"></div>
+    <div class="field"><label>문항</label><textarea id="f-essay-q" placeholder="예: 지원 동기와 입사 후 포부를 서술하시오."></textarea></div>
+    <div class="field"><label>내 답변 초안</label><textarea id="f-essay-a" style="min-height:110px" placeholder="초안을 자유롭게 써보세요"></textarea></div>
+    <div class="field"><label>연결할 경험 키워드</label><input id="f-essay-kw" placeholder="예: 아산병원 실습, 환자소통"></div>
+    <button class="submit-btn" onclick="saveEssay()">저장</button>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet-iv" onclick="closeSheet('iv')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">면접 Q&amp;A 추가</div>
+    <div class="field"><label>유형</label>
+      <select id="f-iv-type"><option>공통 질문</option><option>직무·전공</option><option>병원 특화</option><option>인성·가치관</option><option>상황 대처</option></select>
+    </div>
+    <div class="field"><label>예상 질문</label><textarea id="f-iv-q" placeholder="예: 방사선사로서 환자 안전을 위해 중요하게 생각하는 것은?"></textarea></div>
+    <div class="field"><label>내 답변 (STAR 기법 추천)</label><textarea id="f-iv-a" style="min-height:110px" placeholder="상황 → 과제 → 행동 → 결과 순으로 써보세요"></textarea></div>
+    <button class="submit-btn" onclick="saveIv()">저장</button>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet-sched" onclick="closeSheet('sched')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">일정 추가</div>
+    <div class="field"><label>종류</label>
+      <select id="f-sc-type"><option value="서류마감">서류 마감</option><option value="서류발표">서류 발표</option><option value="면접">면접</option><option value="최종발표">최종 발표</option><option value="기타">기타</option></select>
+    </div>
+    <div class="field"><label>병원명</label><input id="f-sc-hosp" placeholder="예: 서울아산병원"></div>
+    <div class="field"><label>날짜</label><input id="f-sc-date" type="date"></div>
+    <div class="field"><label>시간 (선택)</label><input id="f-sc-time" type="time"></div>
+    <div class="field"><label>메모</label><textarea id="f-sc-memo" placeholder="장소, 준비물, 유의사항 등" style="min-height:70px"></textarea></div>
+    <button class="submit-btn" onclick="saveSched()">저장</button>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div class="detail-overlay" id="detail-view">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeDetail()">
+      <svg viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="detail-header-title" id="detail-title"></div>
+    <span class="badge" id="detail-badge"></span>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<script>
+const KEYS={exp:'jn_exp',hosp:'jn_hosp',essay:'jn_essay',iv:'jn_iv',sched:'jn_sched'};
+const BADGE_EXP={실습:'bt',알바:'bb',동아리:'bp',봉사:'bg',수상:'ba',기타:'bc'};
+const BADGE_HOSP={관심:'bb',준비중:'ba',지원완료:'bt',면접예정:'bc'};
+const BADGE_IV={'공통 질문':'bb','직무·전공':'bt','병원 특화':'bc','인성·가치관':'bp','상황 대처':'ba'};
+const BADGE_SC={서류마감:'bc',서류발표:'ba',면접:'bt',최종발표:'bp',기타:'bb'};
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let currentPage='home';
+
+function load(k){try{return JSON.parse(localStorage.getItem(KEYS[k])||'[]');}catch{return[];}}
+function save(k,d){localStorage.setItem(KEYS[k],JSON.stringify(d));}
+
+function dDay(dateStr){
+  if(!dateStr)return null;
+  const today=new Date();today.setHours(0,0,0,0);
+  const target=new Date(dateStr);target.setHours(0,0,0,0);
+  return Math.round((target-today)/(1000*60*60*24));
+}
+function dDayLabel(d){
+  if(d===null)return'';
+  if(d<0)return'종료';
+  if(d===0)return'D-DAY';
+  return'D-'+d;
+}
+function dDayClass(d){
+  if(d===null||d<0)return'dday-past';
+  if(d<=2)return'dday-urgent';
+  if(d<=7)return'dday-soon';
+  return'dday-ok';
+}
+
+function checkAlerts(){
+  const scheds=load('sched');
+  const urgent=scheds.filter(s=>{const d=dDay(s.date);return d!==null&&d>=0&&d<=3;});
+  if(!urgent.length)return;
+  const banner=document.getElementById('alert-banner');
+  const items=document.getElementById('alert-items');
+  items.innerHTML=urgent.map(s=>`<div class="alert-item">• ${s.hosp} ${s.type} — ${dDayLabel(dDay(s.date))}</div>`).join('');
+  banner.classList.add('show');
+}
+
+function goPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('nav-'+page).classList.add('active');
+  document.getElementById('main-scroll').scrollTop=0;
+  currentPage=page;
+  const fab=document.getElementById('fab-btn');
+  fab.style.display=page==='home'?'none':'flex';
+  if(page==='home')updateHome();
+  else if(page==='sched')renderSched();
+  else renderList(page);
+}
+
+function updateHome(){
+  const c={exp:load('exp').length,hosp:load('hosp').length,essay:load('essay').length,iv:load('iv').length};
+  ['exp','hosp','essay','iv'].forEach(k=>document.getElementById('h-'+k).textContent=c[k]);
+  const max={exp:5,hosp:5,essay:8,iv:10};
+  const labels={exp:c.exp+'개',hosp:c.hosp+'개',essay:c.essay+'문항',iv:c.iv+'개'};
+  ['exp','hosp','essay','iv'].forEach(k=>{
+    document.getElementById('pg-'+k).style.width=Math.min(100,Math.round(c[k]/max[k]*100))+'%';
+    document.getElementById('pg-'+k+'-t').textContent=labels[k];
+  });
+  const h=new Date().getHours();
+  document.getElementById('greeting').textContent=h<12?'좋은 아침이에요!':h<18?'열심히 준비 중이시군요!':'오늘 하루도 수고했어요!';
+  const upcoming=load('sched').filter(s=>{const d=dDay(s.date);return d!==null&&d>=0;}).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,3);
+  const ul=document.getElementById('home-upcoming-list');
+  if(!upcoming.length){ul.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0;">등록된 일정이 없어요</div>';return;}
+  ul.innerHTML=upcoming.map((s,i)=>schedCardHTML(s,i,true)).join('');
+}
+
+function renderList(tab){
+  const items=load(tab);
+  const el=document.getElementById('list-'+tab);
+  if(!items.length){el.innerHTML='<div class="empty-state"><span class="empty-icon">📋</span>아직 저장된 항목이 없어요<br>+ 버튼을 눌러 추가해보세요</div>';return;}
+  el.innerHTML='<div class="item-list">'+items.map((item,i)=>cardHTML(tab,item,i)).join('')+'</div>';
+}
+
+function cardHTML(tab,item,i){
+  let name='',desc='',badge='',bc='bb';
+  if(tab==='exp'){name=item.title;desc=[item.place,item.period].filter(Boolean).join(' · ');badge=item.type;bc=BADGE_EXP[item.type]||'bb';}
+  else if(tab==='hosp'){name=item.name;desc=item.size;badge=item.status;bc=BADGE_HOSP[item.status]||'bb';}
+  else if(tab==='essay'){name=item.hosp||'병원 미정';desc=(item.q||'').slice(0,44)+(item.q&&item.q.length>44?'…':'');badge='자소서';bc='bp';}
+  else{name=(item.q||'').slice(0,38)+(item.q&&item.q.length>38?'…':'');desc=(item.a||'').slice(0,44)+(item.a&&item.a.length>44?'…':'');badge=item.type;bc=BADGE_IV[item.type]||'bb';}
+  return`<div class="item-card" onclick="showDetail('${tab}',${i})">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+      <div style="flex:1"><div class="item-name">${name}</div><div class="item-desc">${desc}</div></div>
+      <button class="del-btn" onclick="event.stopPropagation();deleteItem('${tab}',${i})" aria-label="삭제">✕</button>
+    </div>
+    <div class="item-footer"><span class="badge ${bc}">${badge}</span></div>
+  </div>`;
+}
+
+function renderSched(){
+  const items=load('sched').sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const el=document.getElementById('list-sched');
+  if(!items.length){el.innerHTML='<div class="empty-state"><span class="empty-icon">📅</span>등록된 일정이 없어요<br>+ 버튼을 눌러 추가해보세요</div>';return;}
+  const future=items.filter(s=>dDay(s.date)>=0);
+  const past=items.filter(s=>dDay(s.date)<0);
+  let html='';
+  if(future.length){html+=future.map((s,i)=>schedCardHTML(s,items.indexOf(s),false)).join('');}
+  if(past.length){html+=`<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin:16px 0 8px;">지난 일정</div>`;html+=past.map(s=>schedCardHTML(s,items.indexOf(s),false)).join('');}
+  el.innerHTML=html;
+}
+
+function schedCardHTML(s,i,mini){
+  const d=dDay(s.date);
+  const dateObj=s.date?new Date(s.date):null;
+  const month=dateObj?MONTHS[dateObj.getMonth()]:'';
+  const day=dateObj?dateObj.getDate():'';
+  const label=dDayLabel(d);
+  const cls=dDayClass(d);
+  const urgent=d!==null&&d>=0&&d<=2;
+  if(mini){
+    return`<div class="sched-card${urgent?' urgent':''}" onclick="goPage('sched')">
+      <div class="sched-top">
+        <div class="sched-date-box"><div class="sched-month">${month}</div><div class="sched-day">${day}</div></div>
+        <div class="sched-info">
+          <div class="sched-title">${s.hosp} ${s.type}</div>
+          <div class="sched-sub">${s.time||''} ${s.memo?'· '+s.memo.slice(0,20):''}</div>
+        </div>
+        <div class="sched-dday ${cls}">${label}</div>
+      </div>
+    </div>`;
+  }
+  return`<div class="sched-card${urgent?' urgent':''}" onclick="showSchedDetail(${i})">
+    <div class="sched-top">
+      <div class="sched-date-box"><div class="sched-month">${month}</div><div class="sched-day">${day}</div></div>
+      <div class="sched-info">
+        <div class="sched-title">${s.hosp} ${s.type}</div>
+        <div class="sched-sub">${s.time?s.time+' · ':''}${s.memo?s.memo.slice(0,30):'메모 없음'}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="sched-dday ${cls}">${label}</div>
+        <button class="del-btn" onclick="event.stopPropagation();deleteItem('sched',${i});renderSched();" aria-label="삭제">✕</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function showSchedDetail(i){
+  const s=load('sched')[i];
+  const d=dDay(s.date);
+  document.getElementById('detail-title').textContent=s.hosp+' '+s.type;
+  const badge=document.getElementById('detail-badge');
+  badge.textContent=dDayLabel(d);badge.className='badge '+(d!==null&&d<=2&&d>=0?'br':BADGE_SC[s.type]||'bb');
+  document.getElementById('detail-body').innerHTML=
+    df('병원',s.hosp||'-')+df('종류',s.type)+df('날짜',s.date||'-')+df('시간',s.time||'-')+df('메모',s.memo||'-');
+  document.getElementById('detail-view').classList.add('open');
+}
+
+function openForm(){
+  if(currentPage==='home')return;
+  const id=currentPage==='iv'?'sheet-iv':currentPage==='sched'?'sheet-sched':'sheet-'+currentPage;
+  document.getElementById(id).classList.add('open');
+}
+function closeSheet(t){document.getElementById('sheet-'+t).classList.remove('open');}
+function closeDetail(){document.getElementById('detail-view').classList.remove('open');}
+
+function df(label,value){
+  return`<div class="detail-field"><div class="detail-label">${label}</div><div class="detail-value">${String(value).replace(/\n/g,'<br>')}</div></div>`;
+}
+
+function showDetail(tab,i){
+  const item=load(tab)[i];
+  let title='',bc='bb',bodyHTML='',prompt='';
+  if(tab==='exp'){
+    title=item.title;bc=BADGE_EXP[item.type]||'bb';
+    bodyHTML=df('종류',item.type)+df('기간 / 기관',[item.period,item.place].filter(Boolean).join(' / ')||'-')+df('한 일 / 배운 점',item.detail||'-')+df('핵심 키워드',item.keywords||'-');
+    prompt=`내 경험 "${item.title}" (${item.type}, ${item.place||''})에서 한 일: ${item.detail||''}. 키워드: ${item.keywords||''}. 이 경험을 방사선사 병원 자소서에 어떻게 연결하면 좋을지 구체적으로 알려줘.`;
+  }else if(tab==='hosp'){
+    title=item.name;bc=BADGE_HOSP[item.status]||'bb';
+    bodyHTML=df('규모',item.size)+df('지원 상태',item.status)+df('비전·특징',item.vision||'-')+df('면접 후기',item.review||'-');
+    prompt=`병원: ${item.name} (${item.size}). 비전: ${item.vision||'없음'}. 면접 후기: ${item.review||'없음'}. 이 병원 자소서에서 강조해야 할 포인트와 전략 알려줘.`;
+  }else if(tab==='essay'){
+    title=item.hosp||'자소서';bc='bp';
+    bodyHTML=df('병원',item.hosp||'-')+df('문항',item.q||'-')+df('내 답변 초안',item.a||'-')+df('연결 키워드',item.keywords||'-');
+    prompt=`자소서 문항: ${item.q||''}. 내 초안: ${item.a||''}. 경험 키워드: ${item.keywords||'없음'}. 이 자소서 초안을 방사선사 취업에 맞게 더 설득력 있게 다듬어줘.`;
+  }else{
+    title='면접 Q&A';bc=BADGE_IV[item.type]||'bb';
+    bodyHTML=df('유형',item.type)+df('질문',item.q||'-')+df('내 답변',item.a||'-');
+    prompt=`면접 질문: ${item.q||''}. 내 답변: ${item.a||''}. 이 답변을 STAR 기법으로 더 설득력 있게 다듬어줘.`;
+  }
+  const labels={exp:'이 경험 자소서 연결법 물어보기',hosp:'이 병원 자소서 전략 짜기',essay:'이 자소서 초안 다듬기',iv:'이 답변 더 다듬기'};
+  document.getElementById('detail-title').textContent=title;
+  const badge=document.getElementById('detail-badge');
+  badge.textContent=tab==='exp'?item.type:tab==='hosp'?item.status:tab==='essay'?'자소서':item.type;
+  badge.className='badge '+bc;
+  document.getElementById('detail-body').innerHTML=bodyHTML+
+    `<button class="ai-btn" onclick="copyPrompt(this)" data-prompt="${prompt.replace(/"/g,'&quot;').replace(/\n/g,' ')}">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      ${labels[tab]}
+    </button>
+    <div class="ai-note">누르면 복사 → 클로드 새 채팅에 붙여넣기</div>`;
+  document.getElementById('detail-view').classList.add('open');
+}
+
+function copyPrompt(btn){
+  const text=btn.getAttribute('data-prompt');
+  navigator.clipboard.writeText(text).then(()=>alert('복사됐어요! 클로드 새 채팅에 붙여넣기 해보세요 :)')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('복사됐어요!');
+  });
+}
+
+function deleteItem(tab,i){
+  if(!confirm('삭제할까요?'))return;
+  const data=load(tab);data.splice(i,1);save(tab,data);
+  if(tab==='sched')renderSched();else renderList(tab);
+  updateHome();
+}
+
+function saveExp(){
+  const title=document.getElementById('f-exp-title').value.trim();
+  if(!title){alert('제목을 입력해주세요.');return;}
+  const data=load('exp');
+  data.unshift({type:document.getElementById('f-exp-type').value,title,period:document.getElementById('f-exp-period').value.trim(),place:document.getElementById('f-exp-place').value.trim(),detail:document.getElementById('f-exp-detail').value.trim(),keywords:document.getElementById('f-exp-kw').value.trim()});
+  save('exp',data);
+  ['f-exp-title','f-exp-period','f-exp-place','f-exp-detail','f-exp-kw'].forEach(id=>document.getElementById(id).value='');
+  closeSheet('exp');renderList('exp');updateHome();
+}
+function saveHosp(){
+  const name=document.getElementById('f-hosp-name').value.trim();
+  if(!name){alert('병원명을 입력해주세요.');return;}
+  const data=load('hosp');
+  data.unshift({name,size:document.getElementById('f-hosp-size').value,status:document.getElementById('f-hosp-status').value,vision:document.getElementById('f-hosp-vision').value.trim(),review:document.getElementById('f-hosp-review').value.trim()});
+  save('hosp',data);
+  ['f-hosp-name','f-hosp-vision','f-hosp-review'].forEach(id=>document.getElementById(id).value='');
+  closeSheet('hosp');renderList('hosp');updateHome();
+}
+function saveEssay(){
+  const q=document.getElementById('f-essay-q').value.trim();
+  if(!q){alert('문항을 입력해주세요.');return;}
+  const data=load('essay');
+  data.unshift({hosp:document.getElementById('f-essay-hosp').value.trim(),q,a:document.getElementById('f-essay-a').value.trim(),keywords:document.getElementById('f-essay-kw').value.trim()});
+  save('essay',data);
+  ['f-essay-hosp','f-essay-q','f-essay-a','f-essay-kw'].forEach(id=>document.getElementById(id).value='');
+  closeSheet('essay');renderList('essay');updateHome();
+}
+function saveIv(){
+  const q=document.getElementById('f-iv-q').value.trim();
+  if(!q){alert('질문을 입력해주세요.');return;}
+  const data=load('iv');
+  data.unshift({type:document.getElementById('f-iv-type').value,q,a:document.getElementById('f-iv-a').value.trim()});
+  save('iv',data);
+  ['f-iv-q','f-iv-a'].forEach(id=>document.getElementById(id).value='');
+  closeSheet('iv');renderList('iv');updateHome();
+}
+function saveSched(){
+  const hosp=document.getElementById('f-sc-hosp').value.trim();
+  const date=document.getElementById('f-sc-date').value;
+  if(!hosp||!date){alert('병원명과 날짜를 입력해주세요.');return;}
+  const data=load('sched');
+  data.unshift({type:document.getElementById('f-sc-type').value,hosp,date,time:document.getElementById('f-sc-time').value,memo:document.getElementById('f-sc-memo').value.trim()});
+  save('sched',data);
+  ['f-sc-hosp','f-sc-date','f-sc-time','f-sc-memo'].forEach(id=>document.getElementById(id).value='');
+  closeSheet('sched');renderSched();updateHome();
+}
+
+updateHome();
+checkAlerts();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
+</script>
+</body>
+</html>
